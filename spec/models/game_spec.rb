@@ -19,6 +19,8 @@ RSpec.describe Game, type: :model do
     FactoryGirl.create(:game_with_questions, user: user)
   end
 
+  let(:question) { game_w_questions.current_game_question }
+
   # Группа тестов на работу фабрики создания новых игр
   context 'Game Factory' do
     it 'Game.create_game! new correct game' do
@@ -56,20 +58,70 @@ RSpec.describe Game, type: :model do
     it 'answer correct continues game' do
       # Текущий уровень игры и статус
       level = game_w_questions.current_level
-      q = game_w_questions.current_game_question
       expect(game_w_questions.status).to eq(:in_progress)
 
-      game_w_questions.answer_current_question!(q.correct_answer_key)
+      game_w_questions.answer_current_question!(question.correct_answer_key)
 
       # Перешли на след. уровень
       expect(game_w_questions.current_level).to eq(level + 1)
 
       # Ранее текущий вопрос стал предыдущим
-      expect(game_w_questions.current_game_question).not_to eq(q)
+      expect(game_w_questions.current_game_question).not_to eq(question)
 
       # Игра продолжается
       expect(game_w_questions.status).to eq(:in_progress)
       expect(game_w_questions.finished?).to be_falsey
     end
+
+    it '#take_money! correct' do
+      game_w_questions.answer_current_question!(question.correct_answer_key)
+      game_w_questions.take_money!
+      prize = game_w_questions.prize
+
+      expect(prize).to be > 0
+      expect(game_w_questions.status).to eq :money
+      expect(game_w_questions.finished?).to be_truthy
+      expect(user.balance).to eq prize
+    end
   end
+
+  context 'game status' do
+    it '#status in_progress' do
+    game_w_questions.answer_current_question!(question.correct_answer_key)
+
+    expect(game_w_questions.status).to eq(:in_progress)
+    end
+
+    it '#status won' do
+      game_w_questions.answer_current_question!(question.correct_answer_key)
+      game_w_questions.take_money!
+
+      expect(game_w_questions.status).to eq :money
+    end
+
+    it '#status won' do
+      15.times do
+        game_w_questions.answer_current_question!(question.correct_answer_key)
+      end
+
+      expect(game_w_questions.status).to eq :won
+    end
+
+    it '#status timeout' do
+      game_w_questions.created_at = 1.hour.ago
+      game_w_questions.answer_current_question!(question.correct_answer_key)
+
+      expect(game_w_questions.status).to eq :timeout
+    end
+
+    it '#status fail' do
+      answers = question.variants
+      answers.delete(question.correct_answer_key)
+
+      game_w_questions.answer_current_question!(answers.keys.sample)
+
+      expect(game_w_questions.status).to eq :fail
+    end
+  end
+
 end

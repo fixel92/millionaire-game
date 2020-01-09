@@ -8,6 +8,7 @@ RSpec.describe GameQuestion, type: :model do
   # Задаем локальную переменную game_question, доступную во всех тестах этого
   # сценария: она будет создана на фабрике заново для каждого блока it,
   # где она вызывается.
+
   let(:game_question) do
     FactoryGirl.create(:game_question, a: 2, b: 1, c: 4, d: 3)
   end
@@ -27,6 +28,13 @@ RSpec.describe GameQuestion, type: :model do
     it 'correct .answer_correct?' do
       # Именно под буквой b в тесте мы спрятали указатель на верный ответ
       expect(game_question.answer_correct?('b')).to be_truthy
+    end
+  end
+
+  context 'methods question' do
+    it 'correct #text and #level' do
+      expect(game_question.text).to eq(game_question.question.text)
+      expect(game_question.level).to eq(game_question.question.level)
     end
   end
 end
