@@ -133,4 +133,80 @@ RSpec.describe Game, type: :model do
       expect(game_w_questions.status).to eq :fail
     end
   end
+
+  describe '#answer_current_question!' do
+    context 'right answer' do
+      it 'returns true' do
+        expect(game_w_questions.answer_current_question!(question.correct_answer_key)).to be true
+      end
+      it 'returns status in_progress' do
+        game_w_questions.answer_current_question!(question.correct_answer_key)
+        expect(game_w_questions.status).to eq :in_progress
+      end
+
+      it 'returns finished_at not nil' do
+        game_w_questions.answer_current_question!(question.correct_answer_key)
+        expect(game_w_questions.finished?).to be false
+      end
+    end
+
+    context 'wrong answer' do
+      let(:answers) { question.variants }
+      before(:each) { answers.delete(question.correct_answer_key) }
+
+      it 'returns false' do
+        expect(game_w_questions.answer_current_question!(answers.keys.sample)).to be false
+      end
+
+      it 'returns status fail' do
+        game_w_questions.answer_current_question!(answers.keys.sample)
+        expect(game_w_questions.status).to eq :fail
+      end
+
+      it 'returns finished? true' do
+        game_w_questions.answer_current_question!(answers.keys.sample)
+        expect(game_w_questions.finished?).to be true
+      end
+    end
+
+    context 'last answer to million' do
+      before(:each) { game_w_questions.current_level = '14' }
+      it 'return true' do
+        expect(game_w_questions.answer_current_question!(question.correct_answer_key)).to be true
+      end
+
+      it 'returns status won' do
+        game_w_questions.answer_current_question!(question.correct_answer_key)
+        expect(game_w_questions.status).to eq :won
+      end
+
+      it 'returns finished? true' do
+        game_w_questions.answer_current_question!(question.correct_answer_key)
+        expect(game_w_questions.finished?).to be true
+      end
+    end
+
+    context 'answer after timeout' do
+      before(:each) { game_w_questions.created_at = 1.hour.ago }
+      it 'return status time_out after right answer' do
+
+        game_w_questions.answer_current_question!(question.correct_answer_key)
+
+        expect(game_w_questions.status).to eq :timeout
+      end
+
+      it 'return status time_out after wrong answer' do
+        answers = question.variants
+        answers.delete(question.correct_answer_key)
+
+        game_w_questions.answer_current_question!(answers.keys.sample)
+        expect(game_w_questions.status).to eq :timeout
+      end
+
+      it 'returns finished? true' do
+        game_w_questions.answer_current_question!(question.correct_answer_key)
+        expect(game_w_questions.finished?).to be true
+      end
+    end
+  end
 end
