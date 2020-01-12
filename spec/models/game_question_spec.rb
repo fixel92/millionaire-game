@@ -10,7 +10,7 @@ RSpec.describe GameQuestion, type: :model do
   # где она вызывается.
 
   let(:game_question) do
-    FactoryGirl.create(:game_question, a: 2, b: 1, c: 4, d: 3)
+    FactoryBot.create(:game_question, a: 2, b: 1, c: 4, d: 3)
   end
 
   # Группа тестов на игровое состояние объекта вопроса
