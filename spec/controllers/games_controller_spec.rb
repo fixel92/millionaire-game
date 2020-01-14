@@ -42,6 +42,20 @@ RSpec.describe GamesController, type: :controller do
         expect(flash.empty?).to be_truthy
       end
 
+      it 'answer wrong' do
+        generate_questions(60)
+        answer = game_w_questions.current_game_question.variants
+        answer.delete(game_w_questions.current_game_question.correct_answer_key)
+
+        put :answer, id: game_w_questions.id, letter: answer
+
+        game = assigns(:game)
+
+        expect(game.finished?).to be_truthy
+        expect(response).to redirect_to(user_path(user))
+        expect(flash[:alert]).to be
+      end
+
       context 'user doesnt see other game' do
         it 'redirect to root_path and flash notice' do
           alien_game = FactoryBot.create(:game_with_questions)
