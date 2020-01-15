@@ -139,11 +139,11 @@ class Game < ActiveRecord::Base
   end
 
   def use_help(help_type)
-    return false if TYPES_HELP_USER.keys.exclude?(help_type)
+    return false if TYPES_HELP_USER.keys.exclude?(help_type.to_sym)
 
     unless method("#{help_type}_used").call
       toggle!("#{help_type}_used")
-      current_game_question.method(TYPES_HELP_USER[help_type]).call
+      current_game_question.method(TYPES_HELP_USER[help_type.to_sym]).call
 
       true
     end
