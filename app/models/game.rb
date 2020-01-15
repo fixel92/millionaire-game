@@ -9,6 +9,11 @@ class Game < ActiveRecord::Base
             32_000, 64_000, 125_000, 250_000, 500_000, 1_000_000].freeze
   FIREPROOF_LEVELS = [4, 9, 14].freeze
   TIME_LIMIT = 35.minutes
+  TYPES_HELP_USER = {
+      audience_help: 'add_audience_help',
+      fifty_fifty: 'add_fifty_fifty',
+      friend_call: 'add_friend_call'
+  }
 
   # У игры есть игрок — пользователь, который начал эту игру
   belongs_to :user
@@ -134,15 +139,13 @@ class Game < ActiveRecord::Base
   end
 
   def use_help(help_type)
-    case help_type
-    when :audience_help
-      unless audience_help_used
-        toggle!(:audience_help_used)
-        current_game_question.add_audience_help
+    return false if TYPES_HELP_USER.keys.exclude?(help_type)
 
-        true
-      end
-      false
+    unless method("#{help_type}_used").call
+      toggle!("#{help_type}_used")
+      current_game_question.method(TYPES_HELP_USER[help_type]).call
+
+      true
     end
   end
 
