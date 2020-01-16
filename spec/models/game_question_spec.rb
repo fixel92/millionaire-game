@@ -103,4 +103,25 @@ RSpec.describe GameQuestion, type: :model do
       expect(ff).to include("считает, что это вариант #{game_question.correct_answer_key.upcase}")
     end
   end
+
+  context '#audience_help' do
+    it 'correct .audience_help' do
+      expect(game_question.help_hash).not_to include(:audience_help)
+
+      game_question.add_audience_help
+
+      expect(game_question.help_hash).to include(:audience_help)
+
+      ff = game_question.help_hash[:audience_help]
+
+      expect(ff.keys).to contain_exactly('a', 'b', 'c', 'd')
+    end
+  end
+
+  context '#fifty_fifty' do
+    it 'available .fifty_fifty for user' do
+      expect(game_question.help_hash).not_to include(:fifty_fifty)
+      expect(game_question.game.fifty_fifty_used).to be_falsey
+    end
+  end
 end
