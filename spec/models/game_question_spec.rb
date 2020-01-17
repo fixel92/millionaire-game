@@ -100,7 +100,7 @@ RSpec.describe GameQuestion, type: :model do
 
       ff = game_question.help_hash[:friend_call]
 
-      expect(ff).to include("считает, что это вариант #{game_question.correct_answer_key.upcase}")
+      expect(ff).to include("считает, что это вариант")
     end
   end
 
