@@ -184,15 +184,34 @@ RSpec.describe GamesController, type: :controller do
 
       it 'returns ' do
         expect(game_w_questions.current_game_question.help_hash[:fifty_fifty]).not_to be
-        expect(game_w_questions.fifty_fifty_used).to be_falsey
+        expect(game_w_questions.fifty_fifty_used).to be false
 
         put :help, id: game_w_questions.id, help_type: :fifty_fifty
         game = assigns(:game)
 
-        expect(game.finished?).to be_falsey
-        expect(game.fifty_fifty_used).to be_truthy
+        expect(game.finished?).to be false
+        expect(game.fifty_fifty_used).to be true
         expect(game.current_game_question.help_hash[:fifty_fifty]).to be
       end
+    end
+  end
+
+  describe 'friend_call' do
+    context 'auth user' do
+      before(:each) { sign_in user }
+
+      it 'returns ' do
+        expect(game_w_questions.current_game_question.help_hash[:friend_call]).not_to be
+        expect(game_w_questions.friend_call_used).to be false
+
+        put :help, id: game_w_questions.id, help_type: :friend_call
+        game = assigns(:game)
+
+        expect(game.finished?).to be false
+        expect(game.friend_call_used).to be true
+        expect(game.current_game_question.help_hash[:friend_call]).to be
+      end
+
     end
   end
 end
