@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+ruby '2.3.8'
+
 gem 'rails', '~> 4.2.10'
 
 gem 'devise', '~> 4.7.1'
